@@ -1,5 +1,8 @@
 import numpy as np
 
+import tkinter as tk
+from tkinter import messagebox
+
 MIN = 0
 MAX = 1
 
@@ -9,8 +12,9 @@ def simplex_method(c, A, b, min_or_max=MAX):
     A = np.array(A, dtype=float)
     b = np.array(b, dtype=float)
 
-    # Check dimensions
+    # Check dimensions and make sure they match to avoid errors
     m, n = A.shape
+
     if len(c) != n:
         raise ValueError(f"Length of cost vector c ({len(c)}) must match number of variables ({n})")
     if len(b) != m:
@@ -29,13 +33,16 @@ def simplex_method(c, A, b, min_or_max=MAX):
     basic_vars = list(range(n, n + m))
 
     while True:
-        pivot_col = np.argmin(tableau[0, 0 : n])
-        min_val = tableau[0, pivot_col]
+        # here we only check the first row because it contains the objective function
+        pivot_col = np.argmin(tableau[0, 0 : n]) # find the column with the minimum value in the first row
+        min_val = tableau[0, pivot_col] # get the minimum value
 
+        # if the minimum value is greater than or equal to 0, we have found the optimal solution
         if min_val >= 0: break
 
         ratios = []
 
+        # here we calculate the ratios of the last column (b vector) divided by the pivot column
         for i in range(1, m + 1):
             col_val = tableau[i, pivot_col]
 
@@ -44,22 +51,22 @@ def simplex_method(c, A, b, min_or_max=MAX):
             else:
                 ratios.append(np.inf)
 
-        pivot_row_relative = np.argmin(ratios)
+        pivot_row_relative = np.argmin(ratios) # find the row with the minimum ratio
 
         if ratios[pivot_row_relative] == np.inf:
-            raise ValueError("Unbounded problem")
+            raise ValueError("Unbounded problem, check the constraints and objective function.")
 
-        pivot_row = pivot_row_relative + 1
+        pivot_row = pivot_row_relative + 1 # correct the index to match the tableau itself
 
         pivot_element = tableau[pivot_row, pivot_col]
         tableau[pivot_row, :] /= pivot_element
 
         for r in range(m + 1):
-            if r != pivot_row:
+            if r != pivot_row: # skip the pivot row
                 factor = tableau[r, pivot_col]
-                tableau[r, :] -= factor * tableau[pivot_row, :]
+                tableau[r, :] -= factor * tableau[pivot_row, :] # gauss-jordan elimination
 
-        basic_vars[pivot_row - 1] = pivot_col
+        basic_vars[pivot_row_relative] = pivot_col # update which variable is basic
 
     x = np.zeros(n)
 
@@ -72,10 +79,9 @@ def simplex_method(c, A, b, min_or_max=MAX):
 
     return x, z
 
-
-
-
-
+class GUIBuilder:
+    def __init__(self):
+        pass
 
 def main():
     c = [4, 3, 5, 2]
@@ -86,7 +92,7 @@ def main():
         [1, 2, 2, 1],
         [3, 1, 2, 2],
     ]
-    b = [10, 25, 20, 30]
+    b = [10, 25, -20, 30]
 
     x, z = simplex_method(c, A, b)
 
