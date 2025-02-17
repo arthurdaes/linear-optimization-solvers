@@ -1,12 +1,9 @@
 import numpy as np
 
-import tkinter as tk
-from tkinter import messagebox
+SIMPLEX_MIN = 0
+SIMPLEX_MAX = 1
 
-MIN = 0
-MAX = 1
-
-def simplex_method(c, A, b, min_or_max=MAX):
+def simplex_method(c, A, b, min_or_max=SIMPLEX_MAX):
     # Convert inputs to numpy arrays
     c = np.array(c, dtype=float)
     A = np.array(A, dtype=float)
@@ -27,7 +24,7 @@ def simplex_method(c, A, b, min_or_max=MAX):
     tableau[1 : m + 1, 0 : n] = A # stores the A matrix in the leftmost n columns
     tableau[1 : m + 1, n : n + m] = np.eye(m) # stores the identity matrix in the next m columns
     tableau[1 : m + 1, -1] = b # stores the b vector in the last column
-    tableau[0, 0 : n] = c if min_or_max == MIN else -c # stores the cost vector in the first row
+    tableau[0, 0 : n] = c if min_or_max == SIMPLEX_MIN else -c # stores the cost vector in the first row
 
     # first iteration with basic variables which are the slack variables
     basic_vars = list(range(n, n + m))
@@ -78,27 +75,3 @@ def simplex_method(c, A, b, min_or_max=MAX):
     z = tableau[0, -1]
 
     return x, z
-
-class GUIBuilder:
-    def __init__(self):
-        pass
-
-def main():
-    c = [4, 3, 5, 2]
-    
-    A = [
-        [1, 1, 1, 1],
-        [2, 3, 1, 4],
-        [1, 2, 2, 1],
-        [3, 1, 2, 2],
-    ]
-    b = [10, 25, -20, 30]
-
-    x, z = simplex_method(c, A, b)
-
-    print("x =", x)
-    print("z =", z)
-
-if __name__ == "__main__":
-    main()
-
